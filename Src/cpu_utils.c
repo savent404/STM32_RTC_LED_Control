@@ -54,6 +54,7 @@ To use this module, the following steps should be followed :
 #include "cpu_utils.h"
 #include "FreeRTOS.h"
 #include "Task.h"
+#include "stm32f1xx_hal.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/

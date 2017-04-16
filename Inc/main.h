@@ -46,17 +46,28 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-#include "stm32f1xx_hal.h"
-#include "stdint.h"
-#include "string.h"
-#include "stdio.h"
-#include "stdlib.h"
-
+//#include "stm32f1xx_hal.h"
+//#include "stdint.h"
+//#include "string.h"
+//#include "stdio.h"
+//#include "stdlib.h"
+#include <stdint.h>
+#include <string.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
+#define CH1_Pin GPIO_PIN_0
+#define CH1_GPIO_Port GPIOB
+#define CH2_Pin GPIO_PIN_1
+#define CH2_GPIO_Port GPIOB
+#define CH3_Pin GPIO_PIN_2
+#define CH3_GPIO_Port GPIOB
+#define CH4_Pin GPIO_PIN_10
+#define CH4_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

@@ -154,3 +154,29 @@ BaseType_t CLI_SechAdd(char *pt, size_t size, const char *cmd) {
         default: return 0;
     }
 }
+
+
+static uint32_t Plus_cnt[4] = {0,0,0,0};
+/**
+  * @brief: GPIO中断Callback函数
+  * @param: 中断引脚
+  * @retval:NONE
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    switch (GPIO_Pin) {
+        case CH1_Pin: Plus_cnt[0] += 1; break;
+        case CH2_Pin: Plus_cnt[1] += 1; break;
+        case CH3_Pin: Plus_cnt[2] += 1; break;
+        case CH4_Pin: Plus_cnt[3] += 1; break;
+    }
+}
+
+BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd) {
+    sprintf(pt, "Channel 1~4 cnt:\r\n"
+                "CH1:%d\r\n"
+                "CH2:%d\r\n"
+                "CH3:%d\r\n"
+                "CH4:%d", Plus_cnt[0],
+                Plus_cnt[1],Plus_cnt[2],Plus_cnt[3]);
+    return 0;
+}

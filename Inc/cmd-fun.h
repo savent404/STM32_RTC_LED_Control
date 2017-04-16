@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "FreeRTOS_CLI.h"
+#include <stdint.h>
 /* Public Function */
 extern void CMD_Init(void);
 
@@ -22,5 +23,6 @@ extern BaseType_t CLI_ledSwitch(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_SechList(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_SechAdd(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_ledSwtich(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd);
 #endif
 

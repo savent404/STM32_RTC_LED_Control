@@ -2,7 +2,6 @@
 
 /* Usr Include */
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "cpu_utils.h"
 #include "cmsis_os.h"
@@ -81,6 +80,12 @@ static const CLI_Command_Definition_t CLI_Definition_All[] = {
     " taskAdd on|off date@hou:min\r\n",
     CLI_SechAdd,
     2,
+  },
+  {
+    "cnt",
+    "\r\ncnt:\r\n get Channel 1~4’s number\r\n\r\n",
+    CLI_Plus,
+    0,
   }
 };
 /* Public Function */
