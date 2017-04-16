@@ -18,7 +18,10 @@ BaseType_t CLI_setDate(char *pt, size_t size, const char *cmd) {
     int _date;
     sscanf(cmd, "%*s %d", &_date);
     date.Date = _date;
-    if (HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN) != HAL_OK) {
+    date.Year = 0;
+    date.WeekDay = RTC_WEEKDAY_MONDAY;
+    date.Month = RTC_MONTH_JANUARY;
+    if (_date <= 1 || _date > 31 || HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN) != HAL_OK) {
         sprintf(pt, "Set RTC date Error");
     } else {
         sprintf(pt, "Set RTC date:%d", _date);
@@ -41,7 +44,8 @@ BaseType_t CLI_setTime(char *pt, size_t size, const char *cmd) {
     time.Hours = hours;
     time.Minutes = min;
     time.Seconds = sec;
-    if (HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN) != HAL_OK) {
+    if (hours < 0 || hours > 23 || min < 0 || min > 59 || sec < 0 || sec > 59 ||
+        HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN) != HAL_OK) {
         sprintf(pt, "Set RTC time Error");
     } else {
         sprintf(pt, "RTC time now:%02d:%02d:%02d", time.Hours, time.Minutes, time.Seconds);
@@ -101,6 +105,7 @@ static int sech_add(SechList_Typedef* root, uint8_t option, char *time) {
     npt->date = date;
     npt->hour = hour;
     npt->min = min;
+    npt->option = option;
     if (npt->hour > 23 || npt->min > 59) return -2;
     return 0;
 }
@@ -129,7 +134,7 @@ BaseType_t CLI_SechList(char *spt, size_t size, const char *cmd) {
     sprintf(spt, "LED Turn-on:1/Turn-off:0\r\n");
     for (pos = 1; pos <= cnt; pos++) {
         pt = sech_pos(&root, pos);
-        sprintf(spt, "[%02d] %02d@%02d:%02d %01d\r\n",
+        sprintf(spt + strlen(spt), "[%02d] %02d@%02d:%02d %01d\r\n",
         pos, pt->date, pt->hour, pt->min, pt->option);
     } return 0;
 }
