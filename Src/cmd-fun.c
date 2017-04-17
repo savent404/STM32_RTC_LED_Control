@@ -86,6 +86,12 @@ static const CLI_Command_Definition_t CLI_Definition_All[] = {
     "\r\ncnt:\r\n get Channel 1~4’s number\r\n\r\n",
     CLI_Plus,
     0,
+  },
+  {
+    "start",
+    "\r\nstart:\r\n Start handle\r\n\r\n",
+    CLI_Start,
+    0,
   }
 };
 /* Public Function */

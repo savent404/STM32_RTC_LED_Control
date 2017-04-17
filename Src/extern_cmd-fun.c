@@ -4,6 +4,8 @@
 #include "tim.h"
 #include "cmsis_os.h"
 #include "freertos.h"
+
+
 BaseType_t CLI_getDate(char *pt, size_t size, const char *cmd) {
     RTC_DateTypeDef date;
     if (HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN) != HAL_OK) {
@@ -168,11 +170,28 @@ static uint32_t Plus_cnt[4] = {0,0,0,0};
   * @retval:NONE
   */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    static uint32_t before[4] = {0,0,0,0};
     switch (GPIO_Pin) {
-        case CH1_Pin: Plus_cnt[0] += 1; break;
-        case CH2_Pin: Plus_cnt[1] += 1; break;
-        case CH3_Pin: Plus_cnt[2] += 1; break;
-        case CH4_Pin: Plus_cnt[3] += 1; break;
+        case CH1_Pin: 
+            if (HAL_GPIO_ReadPin(CH1_GPIO_Port, CH1_Pin) && before[0] < HAL_GetTick() + 600) {
+                Plus_cnt[0] += 1;
+                before[0] = HAL_GetTick();
+            } break;
+        case CH2_Pin: 
+            if (HAL_GPIO_ReadPin(CH2_GPIO_Port, CH2_Pin) && before[1] < HAL_GetTick() + 600) {
+                Plus_cnt[1] += 1;
+                before[1] = HAL_GetTick();
+            } break;
+        case CH3_Pin: 
+            if (HAL_GPIO_ReadPin(CH3_GPIO_Port, CH3_Pin) && before[2] < HAL_GetTick() + 600) {
+                Plus_cnt[2] += 1;
+                before[2] = HAL_GetTick();
+            } break;
+        case CH4_Pin:
+            if (HAL_GPIO_ReadPin(CH4_GPIO_Port, CH4_Pin) && before[3] < HAL_GetTick() + 600) {
+                Plus_cnt[3] += 1;
+                before[3] = HAL_GetTick();
+            } break;
     }
 }
 
@@ -184,4 +203,69 @@ BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd) {
                 "CH4:%d", Plus_cnt[0],
                 Plus_cnt[1],Plus_cnt[2],Plus_cnt[3]);
     return 0;
+}
+static osTimerId timer_id;
+static void Timer_Callback(const void *arg);
+osTimerDef(handle, Timer_Callback);
+BaseType_t CLI_Start(char *pt, size_t size, const char *cmd) {
+    static uint8_t init_flag = 0;
+    if (!init_flag) {
+        timer_id = osTimerCreate(osTimer(handle), osTimerPeriodic, &root);
+        init_flag = 1;
+    }
+
+    osTimerStart(timer_id, 3000);
+    sprintf(pt, "Task Start ok, reset counter");
+    Plus_cnt[0] = 0;
+    Plus_cnt[1] = 0;
+    Plus_cnt[2] = 0;
+    Plus_cnt[3] = 0;
+    return 0;
+}
+static void Timer_Callback(const void *arg) {
+    static SechList_Typedef *pt = (SechList_Typedef*)&root;
+    static __IO uint32_t des,now;
+    RTC_TimeTypeDef time;
+    RTC_DateTypeDef date;
+    HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+    
+    printf("\033[s\033[100D");
+    {
+        uint8_t cnt = 20;
+        while (cnt--) {
+            printf("\033[1B\033[K");
+        }
+    }
+    printf("DATE:%02d@%02d:%02d:%02d\r\nCH1:%5ud\r\n%CH2:%5ud\r\n%CH3:%5ud\r\n%CH4:%5ud",
+        date.Date, time.Hours, time.Minutes, time.Seconds,
+        Plus_cnt[0], Plus_cnt[1], Plus_cnt[2], Plus_cnt[3]
+    );
+    printf("\033[u");
+    if (pt) {
+        des = pt->date << 15 | pt->hour << 10 | pt->min << 5;
+        now = date.Date << 15 | time.Hours << 10 | time.Minutes << 5 | time.Seconds;
+        if (des <= now) {
+            if (pt->option) {
+                HAL_TIM_Base_Start(&htim1);
+                HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+                HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+                HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+                HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+            } else {
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
+                HAL_TIM_Base_Stop(&htim1);
+            }
+            if (pt->next == NULL) {
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_4);
+                HAL_TIM_Base_Stop(&htim1);
+            } pt = pt->next;
+        }
+    }
 }

@@ -24,5 +24,6 @@ extern BaseType_t CLI_SechList(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_SechAdd(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_ledSwtich(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_Start(char *pt, size_t size, const char *cmd);
 #endif
 
