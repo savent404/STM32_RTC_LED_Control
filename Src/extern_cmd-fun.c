@@ -142,9 +142,9 @@ BaseType_t CLI_Plus(char *spt, size_t size, const char *cmd) {
     struct Plus_Structure *pt = root.next;
     uint32_t cnt = 1;
     while (pt) {
-        printf("[%d]\t%01d@%02d:%02d\t%d\t%d\t%d\t%d\r\n",
+        printf("[%d]\t%01d@%02d:%02d\t%d\t%d\t%d\r\n",
             cnt++, pt->date, pt->hour, pt->min,
-            pt->ch[0], pt->ch[1], pt->ch[2], pt->ch[3]);
+            pt->ch[0], pt->ch[1], pt->ch[3]);
         pt = pt->next;
     } return 0;
 }
