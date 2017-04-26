@@ -81,6 +81,12 @@ static const CLI_Command_Definition_t CLI_Definition_All[] = {
     0,
   },
   {
+      "LED",
+      "\r\nLED:\r\n Strike mode\r\n\r\n",
+      CLI_Injected,
+      0
+  },
+  {
       "ledT",
       "\r\nledT:\r\n Set led switch period(H)\r\n\r\n",
       CLI_LEDPeriod,

@@ -5,14 +5,22 @@
 #include "cmsis_os.h"
 #include "freertos.h"
 
+static RTC_TimeTypeDef now_time;
+static RTC_DateTypeDef now_date;
+static uint32_t start_flag = 0;
+static uint32_t inject_flag = 0;
+static uint32_t Opration_Inject = 0;
 static int32_t LED_Period_Hour = 12;
 static int32_t CNT_Period_Min = 1;
 static osTimerId timer_id;
 static osTimerId cnt_timer_id;
+static osTimerId inject_timer_id;
 static void Timer_Callback(const void *arg);
 static void Cnt_Timer_Callback(const void *arg);
+static void inject_Timer_Callback(const void *arg);
 osTimerDef(cnt_handle, Cnt_Timer_Callback);
 osTimerDef(handle, Timer_Callback);
+osTimerDef(inject, inject_Timer_Callback);
 
 struct Plus_Structure {
     uint8_t date;
@@ -178,6 +186,9 @@ BaseType_t CLI_Start(char *pt, size_t size, const char *cmd) {
         cnt_timer_id = osTimerCreate(osTimer(cnt_handle), osTimerPeriodic, NULL);
         init_flag = 1;
     }
+    HAL_RTC_GetDate(&hrtc, &now_date, RTC_FORMAT_BIN);
+    HAL_RTC_GetTime(&hrtc, &now_time, RTC_FORMAT_BIN);
+    start_flag = 1;
     osTimerStart(timer_id, LED_Period_Hour*60*60*500);
     osTimerStart(cnt_timer_id, CNT_Period_Min*60*1000);
     sprintf(pt, "Task Start ok, reset counter");
@@ -190,12 +201,72 @@ BaseType_t CLI_Start(char *pt, size_t size, const char *cmd) {
     return 0;
 }
 
+BaseType_t CLI_Injected(char *pt, size_t size, const char *cmd) {
+    static uint8_t init_flag = 0;
+    if (!init_flag) {
+        inject_timer_id = osTimerCreate(osTimer(inject), osTimerOnce, &root);
+        init_flag = 1;
+    }
+    if (start_flag == 0) {
+        Opration_Inject = 0;
+    } else {
+        RTC_TimeTypeDef time;
+        RTC_DateTypeDef date;
+        HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+        HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+        /*uint32_t before = now_time.Minutes *60 + now_time.Seconds;
+        uint32_t now = time.Minutes*60 + time.Seconds;
+        now = now - before;
+        now %= LED_Period_Hour;
+        if (now <= LED_Period_Hour/2 -1) {
+            Opration_Inject = 1;
+        } else if ((now > LED_Period_Hour/2 - 1)&&
+        (now < LED_Period_Hour/2 + 1)) {
+            Opration_Inject = 0;
+        } else if ((now < LED_Period_Hour-1)) {
+            Opration_Inject = 0;
+        } else {
+            Opration_Inject = 1;
+        }*/
+        uint32_t before = now_date.Date*24*60 + now_time.Hours*60 + now_time.Minutes;
+        uint32_t now = date.Date*24*60 + time.Hours*60 + now_time.Minutes;
+        now = now - before;
+        now %= LED_Period_Hour*24*60;
+        
+        if (now <= LED_Period_Hour*24*60/2 - 60) {
+            Opration_Inject = 1;
+        }
+        else if ((now > LED_Period_Hour*24*60/2 - 60)
+            && (now < LED_Period_Hour*24*60/2 + 60)) {
+            Opration_Inject = 0;
+        } else if ((now < LED_Period_Hour*24*60 - 60)) {
+            Opration_Inject = 0;
+        } else {
+            Opration_Inject = 1;
+        }
+    }
+    inject_flag = 1;
+    osTimerStart(inject_timer_id, 1000*60*60);
+    sprintf(pt, "Start injected LED mode");
+    htim1.Init.Prescaler = 0;
+    TIM1->PSC = 199;
+    led_on();
+    return 0;
+}
+static void inject_Timer_Callback(const void *arg) {
+    // uint32_t flag = *(uint32_t*)arg;
+    uint32_t flag = Opration_Inject;
+    if (flag == 0) led_off();
+    inject_flag = 0;
+    TIM1->PSC = 0;
+}
 static void Cnt_Timer_Callback(const void *arg) {
     RTC_TimeTypeDef time;
     RTC_DateTypeDef date;
     HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
     struct Plus_Structure *pt = (struct Plus_Structure*)pvPortMalloc(sizeof(struct Plus_Structure));
+    if (pt == NULL) return;
     pt->next = NULL;
     struct Plus_Structure *ppt = &root;
     while (ppt->next) {
@@ -212,11 +283,13 @@ static void Cnt_Timer_Callback(const void *arg) {
 }
 static void Timer_Callback(const void *arg) {
     static uint8_t buf = 1;
-    if (buf) {
-        buf = 0;
-        led_off();
-    } else {
-        buf = 1;
-        led_on();
+    if (inject_flag == 0) {
+        if (buf) {
+            buf = 0;
+            led_off();
+        } else {
+            buf = 1;
+            led_on();
+        }
     }
 }

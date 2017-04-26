@@ -25,5 +25,6 @@ extern BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_Start(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_CNTPeriod(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_LEDPeriod(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_Injected(char *pt, size_t size, const char *cmd);
 #endif
 
