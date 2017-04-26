@@ -309,7 +309,7 @@ void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc) {
             sec = 0;
             CNT_Period_Min_cnt += 1;
             if (++min >= 60) {
-                min = 0
+                min = 0;
                 LED_Period_Hour_cnt += 1;
             }
         }
