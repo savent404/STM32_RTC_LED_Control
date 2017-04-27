@@ -69,19 +69,6 @@ static const CLI_Command_Definition_t CLI_Definition_All[] = {
     1,
   },
   {
-    "taskList",
-    "\r\ntaskList:\r\n get task list now\r\n\r\n",
-    CLI_SechList,
-    0,
-  },
-  {
-    "taskAdd",
-    "\r\ntaskAdd:\r\n add a task\r\n"
-    " taskAdd on|off date@hou:min\r\n",
-    CLI_SechAdd,
-    2,
-  },
-  {
     "cnt",
     "\r\ncnt:\r\n get Channel 1~4’s number\r\n\r\n",
     CLI_Plus,
@@ -92,7 +79,25 @@ static const CLI_Command_Definition_t CLI_Definition_All[] = {
     "\r\nstart:\r\n Start handle\r\n\r\n",
     CLI_Start,
     0,
-  }
+  },
+  {
+      "LED",
+      "\r\nLED:\r\n Strike mode\r\n\r\n",
+      CLI_Injected,
+      0
+  },
+  {
+      "ledT",
+      "\r\nledT:\r\n Set led switch period(H)\r\n\r\n",
+      CLI_LEDPeriod,
+      1,
+  },
+  {
+      "cntT",
+      "\r\ncntT:\r\n Set Cnt period(M)\r\n\r\n",
+      CLI_CNTPeriod,
+      1,
+  },
 };
 /* Public Function */
 void CMD_Init(void) {

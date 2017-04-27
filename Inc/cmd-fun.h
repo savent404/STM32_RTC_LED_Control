@@ -20,10 +20,11 @@ extern BaseType_t CLI_setDate(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_getTime(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_setTime(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_ledSwitch(char *pt, size_t size, const char *cmd);
-extern BaseType_t CLI_SechList(char *pt, size_t size, const char *cmd);
-extern BaseType_t CLI_SechAdd(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_ledSwtich(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_Plus(char *pt, size_t size, const char *cmd);
 extern BaseType_t CLI_Start(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_CNTPeriod(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_LEDPeriod(char *pt, size_t size, const char *cmd);
+extern BaseType_t CLI_Injected(char *pt, size_t size, const char *cmd);
 #endif
 
