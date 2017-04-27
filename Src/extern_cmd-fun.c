@@ -17,13 +17,15 @@ static int32_t CNT_Period_Min_cnt;
 static osTimerId timer_id;
 static osTimerId cnt_timer_id;
 static osTimerId inject_timer_id;
+static osTimerId loop_timer_id;
 static void Timer_Callback(const void *arg);
 static void Cnt_Timer_Callback(const void *arg);
 static void inject_Timer_Callback(const void *arg);
+static void loop_Timer_Callback(const void *arg);
 osTimerDef(cnt_handle, Cnt_Timer_Callback);
 osTimerDef(handle, Timer_Callback);
 osTimerDef(inject, inject_Timer_Callback);
-
+osTimerDef(loop, loop_Timer_Callback);
 struct Plus_Structure {
     uint8_t date;
     uint8_t hour;
@@ -186,11 +188,13 @@ BaseType_t CLI_Start(char *pt, size_t size, const char *cmd) {
     if (!init_flag) {
         //timer_id = osTimerCreate(osTimer(handle), osTimerPeriodic, &root);
         //cnt_timer_id = osTimerCreate(osTimer(cnt_handle), osTimerPeriodic, NULL);
+        loop_timer_id = osTimerCreate(osTimer(loop), osTimerPeriodic, NULL);
         init_flag = 1;
     }
     HAL_RTC_GetDate(&hrtc, &now_date, RTC_FORMAT_BIN);
     HAL_RTC_GetTime(&hrtc, &now_time, RTC_FORMAT_BIN);
     start_flag = 1;
+    osTimerStart(loop_timer_id, 1000);
     //osTimerStart(timer_id, LED_Period_Hour*60*60*500);
     //osTimerStart(cnt_timer_id, CNT_Period_Min*60*1000);
     sprintf(pt, "Task Start ok, reset counter");
@@ -296,6 +300,16 @@ static void Timer_Callback(const void *arg) {
     }
 }
 
+static void loop_Timer_Callback(const void *arg) {
+        if (CNT_Period_Min_cnt >= CNT_Period_Min && CNT_Period_Min != 0) {
+            CNT_Period_Min_cnt = 0;
+            Cnt_Timer_Callback(NULL);
+        } else if (LED_Period_Hour_cnt >= LED_Period_Hour && LED_Period_Hour != 0) {
+            LED_Period_Hour_cnt = 0;
+            Timer_Callback(NULL);
+        }
+}
+
 /**
   * @brief: 实时时钟-秒中断
   * @param: RTC句柄
@@ -312,14 +326,6 @@ void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc) {
                 min = 0;
                 LED_Period_Hour_cnt += 1;
             }
-        }
-
-        if (CNT_Period_Min_cnt >= CNT_Period_Min && CNT_Period_Min != 0) {
-            CNT_Period_Min_cnt = 0;
-            Cnt_Timer_Callback(NULL);
-        } else if (LED_Period_Hour_cnt >= LED_Period_Hour && LED_Period_Hour != 0) {
-            LED_Period_Hour_cnt = 0;
-            Timer_Callback(NULL);
         }
     }
 }

@@ -129,7 +129,7 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef* rtcHandle)
 
   }
   /* USER CODE BEGIN RTC_MspDeInit 1 */
-
+    
   /* USER CODE END RTC_MspDeInit 1 */
 } 
 
